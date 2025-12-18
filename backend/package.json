@@ -1,0 +1,25 @@
+{
+  "name": "sistem-manajemen-berita---technical-test",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start:api": "node server/index.js",
+    "start:worker": "node worker/worker.js",
+    "db:migrate": "node sharedFunction/database/migrate.js",
+    "db:seed": "node sharedFunction/database/seed.js"
+  },
+  "dependencies": {
+    "@elastic/elasticsearch": "^8.19.1",
+    "amqplib": "^0.10.9",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "joi": "^18.0.2",
+    "mysql2": "^3.16.0",
+    "sequelize": "^6.37.7"
+  }
+}

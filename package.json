@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "docker:up": "docker compose up --build",
+    "docker:reset": "docker compose down -v"
+  }
+}
