@@ -8,11 +8,12 @@ import router from "./router/router.js";
 import "dotenv/config";
 
 const app = express();
-const port = process.env.BACKEND_PORT;
+const port = process.env.PORT || process.env.BACKEND_PORT || 3000;
+const allowedOrigin = process.env.CLIENT_BASE_URL || "*";
 
 app.use(
   cors({
-    origin: process.env.CLIENT_BASE_URL,
+    origin: allowedOrigin,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })

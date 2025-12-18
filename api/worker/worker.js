@@ -40,7 +40,7 @@ const startWorker = async () => {
             content: news.content,
             author: news.author,
             source: news.source,
-            created_at: news.createdAt,
+            created_at: news.created_at,
           },
         });
 

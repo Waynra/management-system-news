@@ -7,6 +7,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "start": "npm run start:api",
     "start:api": "node server/index.js",
     "start:worker": "node worker/worker.js",
     "db:migrate": "node sharedFunction/database/migrate.js",

@@ -1,13 +1,13 @@
 # Sistem Manajemen Berita
 
-Proyek backend untuk manajemen berita dengan pemrosesan asynchronous. API menyimpan berita ke MySQL, mengantrikan tugas ke RabbitMQ, lalu worker melakukan indexing ke Elasticsearch untuk pencarian cepat.
+Backend untuk manajemen berita dengan pemrosesan asynchronous. API menulis ke MySQL, mengantrikan pekerjaan ke RabbitMQ, lalu worker mengindeks ke Elasticsearch untuk pencarian cepat.
 
 ## Gambaran Singkat
 - REST API untuk membuat, mengambil, dan mencari berita.
-- Penyimpanan utama di MySQL; indexing dan pencarian di Elasticsearch.
-- RabbitMQ memisahkan proses penulisan dan indexing sehingga API tetap responsif.
+- MySQL sebagai storage utama; Elasticsearch untuk pencarian.
+- RabbitMQ memisahkan penulisan dan indexing agar API tetap responsif.
 - Migrasi dan seeding otomatis saat stack Docker Compose dijalankan.
-- Koleksi Postman tersedia di `sistem-manajemen-berita.postman_collection` untuk percobaan cepat.
+- Koleksi Postman tersedia di `management-system-news.postman_collection` (bisa diimport ke Thunder Client/Postman Web).
 
 ## Arsitektur
 ```
@@ -32,23 +32,22 @@ Worker (Node.js)                  |
 
 ## Prasyarat
 - Docker & Docker Compose.
-- Port yang digunakan: 3000 (API), 5672 (RabbitMQ), 9200 (Elasticsearch), 3306 (MySQL).
-- Untuk menjalankan tanpa Docker: Node.js 18+ dan akses ke MySQL, RabbitMQ, Elasticsearch.
+- Port: 3000 (API), 5672 (RabbitMQ), 9200 (Elasticsearch), 3306 (MySQL).
+- Jika tanpa Docker: Node.js 18+, akses ke MySQL, RabbitMQ, Elasticsearch.
 
 ## Konfigurasi Environment
-Salin contoh konfigurasi lalu sesuaikan jika perlu:
-
+Salin konfigurasi lalu sesuaikan:
 ```bash
 cp .env.example .env
 ```
 
-Nilai standar (sesuai stack Docker):
+Nilai standar (sesuai Docker Compose):
 ```env
 NODE_ENV=development
-BACKEND_PORT=3000
-CLIENT_BASE_URL=http://localhost:5173
+PORT=3000
+CLIENT_BASE_URL=*
 
-DB_HOST=mysql
+DB_HOST=db
 DB_PORT=3306
 DB_USER=root
 DB_PASSWORD=root
@@ -62,48 +61,43 @@ ELASTICSEARCH_INDEX=news
 
 WORKER_PREFETCH=1
 ```
-Jika menjalankan di luar Docker, ganti `mysql`, `rabbitmq`, dan `elasticsearch` menjadi `localhost` atau host masing-masing layanan.
+Jika menjalankan di luar Docker, ganti `db`, `rabbitmq`, dan `elasticsearch` menjadi `localhost` atau host masing-masing layanan.
 
 ## Jalankan dengan Docker Compose (disarankan)
-1) Clone repo:
-```bash
-git clone https://github.com/Waynra/management-system-news.git
-cd management-system-news
-```
-2) Siapkan `.env` seperti di atas.
-3) Bangun dan jalankan seluruh stack:
+1) Siapkan `.env` seperti di atas.
+2) Bangun dan jalankan stack:
 ```bash
 npm run docker:up
 ```
-   - Service `migrate` akan melakukan migrasi skema.
-   - Service `seed` akan mengisi data contoh dan membuat indeks Elasticsearch.
-4) Hentikan dan bersihkan container serta volume:
+   - Container API menjalankan migrasi dan seeding otomatis (non-production).
+   - Worker berjalan dari image yang sama (`news-backend`) dengan perintah `npm run start:worker`.
+3) Hentikan dan bersihkan container serta volume:
 ```bash
 npm run docker:reset
 ```
 
 ## Menjalankan Secara Lokal (tanpa Docker)
-1) Pastikan MySQL, RabbitMQ, dan Elasticsearch sudah berjalan dan variabel environment sudah diset.
-2) Instal dependensi backend:
+1) Pastikan MySQL, RabbitMQ, Elasticsearch aktif dan env sudah diset.
+2) Instal dependensi:
 ```bash
-cd backend
+cd api
 npm install
 ```
-3) Jalankan migrasi & seeding (hanya untuk non-production):
+3) Migrasi dan seeding (non-production):
 ```bash
 npm run db:migrate
 npm run db:seed
 ```
-4) Jalankan API dan worker pada terminal terpisah:
+4) Jalankan layanan di dua terminal:
 ```bash
-npm run start:api   # menjalankan server REST pada BACKEND_PORT
+npm run start:api   # REST server pada PORT
 npm run start:worker
 ```
 
 ## Endpoint API
-Semua endpoint diawali dengan prefix `/api`.
+Prefix: `/api`.
 
-- `POST /api/news` — Membuat berita baru, menyimpan ke MySQL, lalu mengantrekan indexing.
+- `POST /api/news` — Simpan berita ke MySQL dan antrekan indexing.
   - Body contoh:
     ```json
     {
@@ -113,8 +107,8 @@ Semua endpoint diawali dengan prefix `/api`.
       "source": "Sumber"
     }
     ```
-- `GET /api/news?page=1&limit=10` — Mengambil daftar berita dari MySQL dengan pagination.
-- `GET /api/search?query=kata` — Mencari berita dari Elasticsearch (multi-field, fuzziness aktif).
+- `GET /api/news?page=1&limit=10` — Ambil daftar berita dengan pagination.
+- `GET /api/search?query=kata` — Cari berita dari Elasticsearch (multi-field, fuzziness).
 
 Contoh cURL:
 ```bash
@@ -130,21 +124,24 @@ curl "http://localhost:3000/api/news?page=1&limit=5"
 curl "http://localhost:3000/api/search?query=bbm"
 ```
 
-## Pengujian API
-- Import koleksi Postman: `sistem-manajemen-berita.postman_collection`.
-- Atau gunakan client/frontend di `http://localhost:5173` bila tersedia.
+## Pengujian dengan Postman/Thunder Client
+- Import `management-system-news.postman_collection`.
+  - Postman Web: Import -> File -> pilih file.
+  - Thunder Client: Sidebar petir -> Collections -> ... -> Import -> pilih file.
+- Jalankan urutan Add -> List -> Search. Beri jeda beberapa detik agar worker selesai indexing sebelum mencari.
 
 ## Script yang Tersedia
 - Root:
-  - `npm run docker:up` — Build & jalankan seluruh stack Docker Compose.
+  - `npm run docker:up` — Build & jalankan stack Docker Compose.
   - `npm run docker:reset` — Matikan stack dan hapus volume.
-- Backend:
+- Backend (folder `api`):
   - `npm run start:api` — Menjalankan API server.
-  - `npm run start:worker` — Menjalankan worker RabbitMQ → Elasticsearch.
+  - `npm run start:worker` — Menjalankan worker RabbitMQ -> Elasticsearch.
   - `npm run db:migrate` — Migrasi skema database (skip pada production).
   - `npm run db:seed` — Seed data contoh dan indeks Elasticsearch (skip pada production).
 
-## Catatan & Tips
-- Proses indexing bersifat asynchronous; data baru muncul di pencarian setelah worker memproses antrean.
-- Jika terjadi inkonsistensi indeks, jalankan ulang `npm run db:seed` (non-production) atau reindeks sesuai kebutuhan.
-- Simpan kredensial sensitif di `.env` dan jangan commit file tersebut.
+## Catatan & Troubleshooting
+- Indexing asynchronous: data baru muncul di pencarian setelah worker memproses antrean.
+- Cek log: `docker compose logs -f api` (API/migrasi/seed), `docker compose logs -f worker` (indexing).
+- Cek indeks Elasticsearch: `curl http://localhost:9200/_cat/indices` harus menampilkan indeks `news` dengan jumlah dokumen > 0 setelah seeding atau worker jalan.
+- Jika pencarian kosong, tunggu beberapa detik lalu coba lagi; bila masih kosong, pastikan worker tidak error dan queue tidak menumpuk.
