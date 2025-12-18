@@ -14,8 +14,8 @@ Sistem ini mengintegrasikan MySQL sebagai database utama untuk penyimpanan data 
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/ahmadaliff/sistem-manajemen-berita.git
-cd sistem-manajemen-berita
+git clone https://github.com/Waynra/management-system-news.git
+cd management-system-news
 ```
 
 ### 2. Konfigurasi Environment
