@@ -13,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"title\": \"Timnas Indonesia Lolos ke Final\",\r\n    \"content\": \"Timnas Indonesia memastikan tiket final setelah menang dramatis di semifinal.\",\r\n    \"author\": \"Dewi\",\r\n    \"source\": \"twitter\"\r\n}",
+					"raw": "{\r\n    \"title\": \"Harga BBM Naik Mulai Hari Ini\",\r\n    \"content\": \"Pemerintah resmi menaikkan harga BBM subsidi mulai hari ini sebagai bagian dari penyesuaian anggaran.\",\r\n    \"author\": \"Redaksi\",\r\n    \"source\": \"kompas\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
