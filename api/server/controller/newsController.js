@@ -19,9 +19,14 @@ export const addNewsController = async (req, res) => {
       id,
     });
   } catch (error) {
-    return res.status(400).json({
-      status: "failed",
-      message: error.message,
+    const isValidationError = Boolean(error.isJoi);
+    const statusCode = isValidationError ? 400 : 500;
+    if (!isValidationError) {
+      console.error("addNewsController error:", error.message);
+    }
+    return res.status(statusCode).json({
+      status: "error",
+      message: isValidationError ? error.message : "Internal server error",
     });
   }
 };
@@ -33,9 +38,14 @@ export const searchController = async (req, res) => {
     const dataResponse = await searchHelper(query);
     return res.status(200).json(dataResponse);
   } catch (error) {
-    return res.status(400).json({
-      status: "failed",
-      message: error.message,
+    const isValidationError = Boolean(error.isJoi);
+    const statusCode = isValidationError ? 400 : 500;
+    if (!isValidationError) {
+      console.error("searchController error:", error.message);
+    }
+    return res.status(statusCode).json({
+      status: "error",
+      message: isValidationError ? error.message : "Internal server error",
     });
   }
 };
@@ -46,9 +56,14 @@ export const getNewsController = async (req, res) => {
     const dataResponse = await getNewsHelper(req.query);
     return res.status(200).json(dataResponse);
   } catch (error) {
-    return res.status(400).json({
-      status: "failed",
-      message: error.message,
+    const isValidationError = Boolean(error.isJoi);
+    const statusCode = isValidationError ? 400 : 500;
+    if (!isValidationError) {
+      console.error("getNewsController error:", error.message);
+    }
+    return res.status(statusCode).json({
+      status: "error",
+      message: isValidationError ? error.message : "Internal server error",
     });
   }
 };

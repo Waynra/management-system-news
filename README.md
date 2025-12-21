@@ -55,11 +55,15 @@ DB_NAME=news_db
 
 RABBITMQ_URL=amqp://rabbitmq
 RABBITMQ_QUEUE=news_queue
+RABBITMQ_MAX_RETRY=5
+RABBITMQ_RETRY_DELAY_MS=2000
 
 ELASTICSEARCH_URL=http://elasticsearch:9200
 ELASTICSEARCH_INDEX=news
 
 WORKER_PREFETCH=1
+WORKER_MAX_RETRY=3
+WORKER_RETRY_DELAY_MS=2000
 ```
 Jika menjalankan di luar Docker, ganti `db`, `rabbitmq`, dan `elasticsearch` menjadi `localhost` atau host masing-masing layanan.
 
@@ -142,6 +146,7 @@ curl "http://localhost:3000/api/search?query=bbm"
 
 ## Catatan & Troubleshooting
 - Indexing asynchronous: data baru muncul di pencarian setelah worker memproses antrean.
+- Worker: idempotent (dokumen ES memakai id berita) dan akan retry terbatas dengan backoff; jika koneksi RabbitMQ putus, consumer akan mencoba restart otomatis.
 - Cek log: `docker compose logs -f api` (API/migrasi/seed), `docker compose logs -f worker` (indexing).
 - Cek indeks Elasticsearch: `curl http://localhost:9200/_cat/indices` harus menampilkan indeks `news` dengan jumlah dokumen > 0 setelah seeding atau worker jalan.
 - Jika pencarian kosong, tunggu beberapa detik lalu coba lagi; bila masih kosong, pastikan worker tidak error dan queue tidak menumpuk.

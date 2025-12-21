@@ -1,6 +1,7 @@
 import News from "../../sharedFunction/database/models/News.js";
 import esClient from "../../sharedFunction/elastic/connection.js";
-import { getChannel } from "../../sharedFunction/rabbitMQ/connection.js";
+import ensureElasticIndex from "../../sharedFunction/elastic/ensureIndex.js";
+import { initRabbitMQ } from "../../sharedFunction/rabbitMQ/connection.js";
 
 export const addNewsHelper = async (payload) => {
   try {
@@ -12,7 +13,7 @@ export const addNewsHelper = async (payload) => {
       created_at: new Date(),
     });
 
-    const channel = getChannel();
+    const channel = await initRabbitMQ();
 
     channel.sendToQueue(
       process.env.RABBITMQ_QUEUE,
@@ -31,6 +32,8 @@ export const addNewsHelper = async (payload) => {
 
 export const searchHelper = async (query) => {
   try {
+    await ensureElasticIndex();
+
     const result = await esClient.search({
       index: process.env.ELASTICSEARCH_INDEX,
       query: {
