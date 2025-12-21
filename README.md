@@ -1,6 +1,6 @@
 # Sistem Manajemen Berita
 
-Backend untuk manajemen berita dengan pemrosesan asynchronous. API menulis ke MySQL, mengantrikan pekerjaan ke RabbitMQ, lalu worker mengindeks ke Elasticsearch untuk pencarian cepat.
+Backend untuk manajemen berita dengan pemrosesan asynchronous. API menulis ke MySQL, mengantrikan pekerjaan ke RabbitMQ, lalu worker mengindeks ke Elasticsearch untuk pencarian cepat. test case PT Rudex Teknologi Indonesia
 
 ## Gambaran Singkat
 - REST API untuk membuat, mengambil, dan mencari berita.
